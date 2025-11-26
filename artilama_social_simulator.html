@@ -1,0 +1,688 @@
+```html name=artilama_social_simulator.html url=https://github.com/alejandroperezarango-hue/Estructuras-de-control-CHAT-GPT/blob/main/artilama_social_simulator.html
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>ARTILAMA — Simulación: Inicio de Red Social (estilo Facebook) + Mapa completo de conceptos</title>
+<meta name="description" content="Simulación pedagógica que muestra capitalismo de la vigilancia, economía de la atención y economías de los afectos.">
+<style>
+  :root{
+    --bg:#f0f2f5; --card:#fff; --muted:#6b7280; --accent:#1877f2;
+    --vigilancia:#ef4444; --atencion:#f59e0b; --afectos:#3b82f6;
+    --shadow:0 6px 22px rgba(2,6,23,0.08); --radius:10px;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%; margin:0; background:var(--bg); color:#071124; -webkit-font-smoothing:antialiased;}
+  .app{max-width:1200px; margin:18px auto; padding:12px;}
+  /* Topbar estilo Facebook */
+  .topbar{display:flex; align-items:center; gap:12px; background:var(--card); padding:10px 12px; border-radius:10px; box-shadow:var(--shadow);}
+  .brand{display:flex; gap:12px; align-items:center;}
+  .logo{width:42px;height:42px;border-radius:8px;background:linear-gradient(135deg,var(--accent),#1d9bf0);display:flex;align-items:center;justify-content:center;color:white;font-weight:700}
+  .searchbar{flex:1; display:flex; align-items:center; gap:8px; padding:6px 10px; background:#f0f2f5; border-radius:999px;}
+  .searchbar input{border:0;background:transparent;outline:none;width:100%; font-size:0.95rem}
+  .nav-actions{display:flex; gap:8px; align-items:center;}
+  .icon-btn{background:transparent;border:0;padding:8px 10px;border-radius:8px;cursor:pointer;color:var(--muted);font-weight:600}
+  .icon-btn.active{background:#e8f0ff;color:var(--accent)}
+  .layout{display:grid; grid-template-columns: 260px 1fr 320px; gap:14px; margin-top:14px;}
+  .card{background:var(--card); border-radius:12px; padding:12px; box-shadow:var(--shadow); border:1px solid rgba(2,6,23,0.03);}
+  /* left */
+  .profile-mini{display:flex; gap:10px; align-items:center}
+  .avatar-sm{width:44px; height:44px; border-radius:10px; background:linear-gradient(180deg,#eee,#ddd)}
+  .menu-list{display:flex; flex-direction:column; gap:6px; margin-top:10px}
+  .menu-item{padding:8px;border-radius:8px;cursor:pointer;color:var(--muted)}
+  .menu-item:hover{background:#f3f4f6;color:#111827}
+  /* feed center */
+  .feed-top{display:flex; gap:12px; flex-direction:column;}
+  .stories{display:flex; gap:10px; padding:8px 2px; overflow:auto}
+  .story{width:110px; height:160px; border-radius:10px; background:linear-gradient(180deg,#fff,#f7f9fb); display:flex; flex-direction:column; justify-content:flex-end; padding:8px; box-shadow:0 8px 20px rgba(2,6,23,0.04); cursor:pointer;}
+  .composer{display:flex; gap:10px; align-items:center; padding:10px; border-radius:12px; background:#fff; border:1px solid rgba(2,6,23,0.03)}
+  .composer input{flex:1;border:0;outline:none;background:transparent}
+  .post{margin-top:12px; border-radius:12px; overflow:hidden; background:var(--card); border:1px solid rgba(2,6,23,0.03); box-shadow:var(--shadow);}
+  .post .post-header{display:flex; gap:12px; padding:12px; align-items:center;}
+  .post .post-body{padding:0 12px 12px 12px; color:#111827;}
+  .post .post-image{height:320px; background:linear-gradient(180deg,#e6eefc,#f4f9ff); border-radius:8px; margin:8px 0; display:flex;align-items:center;justify-content:center;color:var(--muted); position:relative;}
+  .post .post-video{height:320px; background:linear-gradient(180deg,#eef6ff,#f7fdff); border-radius:8px; margin:8px 0; display:flex;align-items:center;justify-content:center;color:var(--muted); position:relative; overflow:hidden;}
+  .post .promo-badge{position:absolute;left:12px;top:12px;background:#fff2f2;color:var(--vigilancia); padding:6px 8px; border-radius:999px; font-weight:700; border:1px solid rgba(239,68,68,0.06)}
+  .post .counts{padding:6px 12px;color:var(--muted); font-size:0.9rem;}
+  .post .post-actions{display:flex; gap:8px; padding:10px 12px; border-top:1px solid rgba(2,6,23,0.03); background:#fff;}
+  .action-btn{flex:1;padding:8px;border-radius:8px;border:1px solid rgba(2,6,23,0.03);background:#f8fafc;cursor:pointer;display:flex;gap:8px;align-items:center;justify-content:center}
+  .comment-box{display:flex; gap:8px; padding:10px 12px; border-top:1px solid rgba(2,6,23,0.03); background:#fff;}
+  .comment-box input{flex:1;border:0;outline:none;background:transparent}
+  /* right */
+  .suggestion{display:flex; gap:10px; align-items:center; justify-content:space-between; padding:8px 0;}
+  .small{font-size:0.86rem;color:var(--muted)}
+  .tooltip{position:fixed; z-index:9999; display:none; max-width:360px; background:rgba(2,6,23,0.95); color:white; padding:10px 12px; border-radius:8px;}
+  .legend{display:flex; gap:8px; margin-top:10px; flex-direction:column;}
+  /* docente mode */
+  .docente-mode [data-concept]{position:relative}
+  .doc-badge{position:absolute; right:8px; top:8px; padding:6px 8px; border-radius:999px; color:white; font-weight:700; font-size:0.75rem; display:none}
+  .docente-mode .doc-badge{display:block}
+  .doc-vigilancia{background:var(--vigilancia)}
+  .doc-atencion{background:var(--atencion)}
+  .doc-afectos{background:var(--afectos)}
+  .docente-mode [data-concept="vigilancia"]{outline:3px solid rgba(239,68,68,0.12)}
+  .docente-mode [data-concept="atencion"]{outline:3px solid rgba(245,158,11,0.12)}
+  .docente-mode [data-concept="afectos"]{outline:3px solid rgba(59,130,246,0.12)}
+  /* micro labels list */
+  .map-panel{max-height:520px; overflow:auto;}
+  .map-item{display:flex;gap:8px;padding:8px;border-bottom:1px solid rgba(2,6,23,0.03);align-items:flex-start;cursor:pointer}
+  .map-bullet{width:10px;height:10px;border-radius:999px;margin-top:6px}
+  .map-vigilancia{background:var(--vigilancia)}
+  .map-atencion{background:var(--atencion)}
+  .map-afectos{background:var(--afectos)}
+  /* responsive */
+  @media(max-width:1000px){ .layout{grid-template-columns:1fr} .sidebar-left{order:2} .sidebar-right{order:3} }
+</style>
+</head>
+<body>
+<div class="app" role="application" aria-label="Simulación ARTI LAMA - interfaz tipo Facebook">
+  <div class="topbar" role="banner" aria-label="Barra superior">
+    <div class="brand">
+      <div class="logo" aria-hidden="true">A</div>
+      <div>
+        <div style="font-weight:700">ARTILAMA</div>
+        <div class="small" style="margin-top:2px">Simulador pedagógico</div>
+      </div>
+    </div>
+
+    <div class="searchbar" role="search" aria-label="Buscar en la red social">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M21 21l-4.35-4.35" stroke="#6b7280" stroke-width="2" stroke-linecap="round"/></svg>
+      <input id="top-search" placeholder="Buscar personas, publicaciones o temas" aria-label="Buscar publicaciones o personas" />
+      <button id="top-search-btn" class="icon-btn" title="Buscar">Ir</button>
+    </div>
+
+    <div class="nav-actions" role="navigation" aria-label="Acciones principales">
+      <button class="icon-btn active" data-action="home" title="Inicio">Inicio</button>
+      <button class="icon-btn" data-action="watch" title="Watch">Watch</button>
+      <button class="icon-btn" data-action="market" title="Marketplace">Mercado</button>
+      <button class="icon-btn" data-action="groups" title="Grupos">Grupos</button>
+      <button class="icon-btn" id="notif-btn" title="Notificaciones">🔔 <span id="notif-badge" class="small" style="display:inline-block;margin-left:6px">3</span></button>
+    </div>
+  </div>
+
+  <div class="layout" role="main">
+    <!-- LEFT: perfil y accesos -->
+    <div class="sidebar-left">
+      <div class="card" role="navigation" aria-label="Perfil y accesos">
+        <div class="profile-mini" role="region" aria-label="Perfil">
+          <div class="avatar-sm" aria-hidden="true"></div>
+          <div>
+            <div style="font-weight:700">Profesor/a Ejemplo</div>
+            <div class="small">Ver perfil</div>
+          </div>
+        </div>
+        <div class="menu-list" aria-hidden="false">
+          <div class="menu-item" data-what="menu-home">Inicio</div>
+          <div class="menu-item" data-what="menu-saved" data-concept="vigilancia">Guardados</div>
+          <div class="menu-item" data-what="menu-groups">Grupos</div>
+          <div class="menu-item" data-what="menu-events" data-concept="atencion">Eventos</div>
+          <div class="menu-item" data-what="menu-settings" data-concept="vigilancia">Configuración</div>
+        </div>
+      </div>
+
+      <div style="height:12px"></div>
+
+      <div class="card">
+        <strong>Panel pedagógico</strong>
+        <p class="small">Activa "Modo docente" para ver etiquetas en cada elemento. En la parte derecha tienes el mapa completo de microelementos (clasificados).</p>
+        <div style="margin-top:8px"><button id="go-landing" class="icon-btn">Ir a Landing teórica</button></div>
+      </div>
+    </div>
+
+    <!-- CENTER: FEED tipo Facebook -->
+    <div class="main">
+      <div class="card feed-top" aria-live="polite">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <strong>Inicio</strong>
+          <div class="small">Interacciona para ver qué estructura teórica opera detrás</div>
+        </div>
+
+        <div class="stories" role="list" aria-label="Historias">
+          <div class="story" role="listitem" tabindex="0" data-concept="atencion" data-what="story-autoplay">
+            <div style="font-weight:700">Tu historia</div>
+            <div class="small">Autoplay</div>
+          </div>
+          <div class="story" role="listitem" tabindex="0" data-concept="vigilancia" data-what="story-suggested">
+            <div style="font-weight:700">Sugerida</div>
+            <div class="small">Basado en actividad</div>
+          </div>
+        </div>
+
+        <div class="composer" role="region" aria-label="Crear publicación">
+          <div class="avatar-sm" aria-hidden="true"></div>
+          <input id="composer-input" placeholder="¿Qué estás pensando?" aria-label="¿Qué estás pensando?" />
+          <button id="composer-post" class="action-btn" aria-label="Publicar">Publicar</button>
+        </div>
+      </div>
+
+      <!-- FEED AREA -->
+      <div id="feed-area">
+        <!-- POST 1 -->
+        <article class="post" data-id="p1" role="article" aria-label="Publicación 1">
+          <div class="post-header">
+            <div class="avatar-sm" aria-hidden="true"></div>
+            <div style="flex:1">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                  <strong>María R.</strong>
+                  <div class="small" style="display:inline-block; margin-left:8px;">
+                    <span class="time-stamp" data-concept="vigilancia">Hace 2h</span> ·
+                    <span class="privacy" data-concept="vigilancia">Público</span>
+                  </div>
+                </div>
+                <div class="small">Música</div>
+              </div>
+            </div>
+            <div>
+              <button class="icon-btn" data-what="post-options">···</button>
+            </div>
+          </div>
+
+          <div class="post-body">
+            <div>Mi última foto en el concierto. ¡Increíble noche!</div>
+
+            <div class="post-image" data-concept="atencion" data-what="image">
+              <svg width="100%" height="100%" viewBox="0 0 400 200" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Foto del concierto">
+                <rect width="100%" height="100%" fill="#dfefff"/>
+                <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#6b7280">[Imagen: Concierto]</text>
+              </svg>
+              <div class="promo-badge" data-concept="vigilancia" title="Promocionado">Promocionado</div>
+              <a class="tag small" href="#" data-concept="vigilancia">#Festival</a>
+              <a class="mention small" href="#" data-concept="vigilancia">@amigo</a>
+            </div>
+
+            <div class="counts">
+              <span class="reaction-count" data-concept="afectos">20 reacciones</span>
+              <span class="small views" data-concept="atencion"> · 1.2k vistas</span>
+              <span class="small" style="margin-left:8px">· Compartido 5 veces</span>
+            </div>
+
+            <!-- URL preview (microelement) -->
+            <div class="card" style="margin-top:8px" data-concept="vigilancia" data-what="link-preview">
+              <div style="display:flex;gap:8px;align-items:center">
+                <div style="width:60px;height:40px;background:#eef6ff;border-radius:6px"></div>
+                <div>
+                  <div style="font-weight:700">Reseña del festival</div>
+                  <div class="small">enlace externo · ejemplo.com</div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="post-actions" role="group">
+            <button class="action-btn react-btn" data-reaction="like" data-concept="afectos">👍 <span class="count">12</span></button>
+            <button class="action-btn react-btn" data-reaction="comment" data-concept="afectos">💬 Comentar</button>
+            <button class="action-btn react-btn" data-reaction="share" data-concept="atencion">🔁 Compartir</button>
+            <button class="action-btn react-btn" data-reaction="save" data-concept="vigilancia">🔖 Guardar</button>
+          </div>
+
+          <div class="comment-box">
+            <div class="avatar-sm" aria-hidden="true"></div>
+            <input class="comment-input" placeholder="Escribe un comentario..." />
+            <button class="action-btn comment-send">Enviar</button>
+            <div class="small" style="margin-left:auto">Ver más comentarios</div>
+          </div>
+        </article>
+
+        <!-- POST 2 (video autoplay) -->
+        <article class="post" data-id="p2" role="article" aria-label="Publicación 2">
+          <div class="post-header">
+            <div class="avatar-sm" aria-hidden="true"></div>
+            <div style="flex:1">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <div>
+                  <strong>Noticias Hoy</strong>
+                  <div class="small" style="display:inline-block; margin-left:8px;"><span class="time-stamp" data-concept="vigilancia">Hace 1h</span></div>
+                </div>
+                <div class="small">Actualidad</div>
+              </div>
+            </div>
+            <div><button class="icon-btn" data-what="post-options">···</button></div>
+          </div>
+
+          <div class="post-body">
+            <div>Video: Tendencias que están cambiando la ciudad</div>
+
+            <div class="post-video" data-concept="atencion" data-what="video-autoplay">
+              <div class="small">[Video placeholder — autoplay simulado]</div>
+              <div style="position:absolute; left:12px; bottom:12px" class="small views" data-concept="atencion">1.8k vistas</div>
+              <div style="position:absolute; right:12px; bottom:12px" class="controls">
+                <button class="action-btn play-btn" aria-label="Reproducir">▶</button>
+                <button class="action-btn mute-btn" aria-label="Silenciar">🔇</button>
+              </div>
+              <div style="position:absolute; left:12px; right:12px; bottom:4px" class="progress" aria-hidden="true"><div style="height:6px;background:linear-gradient(90deg,#1877f2,#0ea5a4);width:20%;border-radius:6px"></div></div>
+            </div>
+
+            <div class="counts"><span class="reaction-count" data-concept="afectos">62 reacciones</span> · <span class="small">40 comentarios</span></div>
+          </div>
+
+          <div class="post-actions">
+            <button class="action-btn react-btn" data-reaction="like" data-concept="afectos">👍 <span class="count">40</span></button>
+            <button class="action-btn react-btn" data-reaction="love" data-concept="afectos">❤️ <span class="count">22</span></button>
+            <button class="action-btn react-btn" data-reaction="share" data-concept="atencion">🔁 Compartir</button>
+            <button class="action-btn react-btn" data-reaction="save" data-concept="vigilancia">🔖 Guardar</button>
+          </div>
+
+          <div class="comment-box">
+            <div class="avatar-sm" aria-hidden="true"></div>
+            <input class="comment-input" placeholder="Escribe un comentario..." />
+            <button class="action-btn comment-send">Enviar</button>
+            <div class="small" style="margin-left:auto">Mostrar transcripción</div>
+          </div>
+        </article>
+
+        <!-- POST 3 (texto + reaction picker example) -->
+        <article class="post" data-id="p3" role="article" aria-label="Publicación 3">
+          <div class="post-header">
+            <div class="avatar-sm" aria-hidden="true"></div>
+            <div style="flex:1">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <div>
+                  <strong>Camilo</strong>
+                  <div class="small" style="display:inline-block; margin-left:8px;"><span class="time-stamp" data-concept="vigilancia">Hace 3h</span></div>
+                </div>
+                <div class="small">Libro</div>
+              </div>
+            </div>
+            <div><button class="icon-btn" data-what="post-options">···</button></div>
+          </div>
+
+          <div class="post-body">
+            <div>Recomiendo este libro sobre cuidado emocional — muy recomendable.</div>
+            <div class="counts"><span class="reaction-count" data-concept="afectos">26 reacciones</span></div>
+            <!-- reaction picker microelement (hover to open simulated picker) -->
+            <div style="margin-top:8px">
+              <button class="action-btn reaction-picker-trigger" data-concept="afectos">❤️ Reacciones</button>
+              <div class="small" style="margin-top:6px">Pulse para ver opciones (👍 😮 😢 🔥)</div>
+            </div>
+          </div>
+
+          <div class="post-actions">
+            <button class="action-btn react-btn" data-reaction="like" data-concept="afectos">👍 <span class="count">5</span></button>
+            <button class="action-btn react-btn" data-reaction="heart" data-concept="afectos">💗 <span class="count">20</span></button>
+            <button class="action-btn react-btn" data-reaction="share" data-concept="atencion">🔁 Compartir</button>
+            <button class="action-btn react-btn" data-reaction="save" data-concept="vigilancia">🔖 Guardar</button>
+          </div>
+
+          <div class="comment-box">
+            <div class="avatar-sm" aria-hidden="true"></div>
+            <input class="comment-input" placeholder="Escribe un comentario..." />
+            <button class="action-btn comment-send">Enviar</button>
+            <div class="small" style="margin-left:auto">Visto por: <span class="small">Ana, Luis</span></div>
+          </div>
+        </article>
+      </div>
+
+      <div class="footer small">Prototipo — Interfaz simulada para análisis crítico. No recolecta datos reales.</div>
+    </div>
+
+    <!-- RIGHT: controles y mapa exhaustivo -->
+    <div class="sidebar-right">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div><strong>Controles</strong><div class="small">Ajusta la simulación</div></div>
+          <div class="small">Resumen</div>
+        </div>
+
+        <div style="margin-top:10px">
+          <label class="small">Agresividad del algoritmo</label>
+          <input id="algo-eng" type="range" min="0" max="100" value="60" />
+          <label class="small" style="margin-top:8px">Diversidad</label>
+          <input id="algo-div" type="range" min="0" max="100" value="30" />
+        </div>
+      </div>
+
+      <div style="height:12px"></div>
+
+      <div class="card map-panel" aria-label="Mapa completo de microelementos (clasificados)">
+        <strong>Mapa exhaustivo de microelementos</strong>
+        <div style="margin-top:8px" class="small">Cada entrada muestra el microelemento, el concepto predominante y una explicación breve.</div>
+
+        <!-- We'll generate this list from JS; placeholder container -->
+        <div id="micro-map" style="margin-top:10px"></div>
+      </div>
+
+      <div style="height:12px"></div>
+
+      <div class="card small">
+        <strong>Modo docente</strong>
+        <p class="small">Activa el modo docente para colorear elementos y mostrar etiquetas directamente en la interfaz.</p>
+        <div style="display:flex; gap:8px; margin-top:8px">
+          <button id="toggle-doc" class="action-btn">Alternar Modo docente</button>
+          <button id="explain-all" class="action-btn">Explicar todo</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="tooltip" class="tooltip" role="tooltip" aria-hidden="true"></div>
+</div>
+
+<script>
+/* ---------- EXHAUSTIVE MAPPING: microelement -> {concept, reason} ---------- */
+const MICRO_MAP = [
+  {key:'top-search', label:'Barra de búsqueda (top)', concept:'Capitalismo de la vigilancia', why:'Registra consultas y señales que alimentan perfiles y recomendaciones.'},
+  {key:'top-search-btn', label:'Botón buscar (top)', concept:'Capitalismo de la vigilancia', why:'Activa la consulta; la señal se convierte en dato de perfil.'},
+  {key:'notif-badge', label:'Badge de notificaciones (campana)', concept:'Economía de la atención', why:'Interruptor atencional que atrae la mirada y provoca retorno.'},
+  {key:'story-autoplay', label:'Historia con autoplay', concept:'Economía de la atención', why:'Formato efímero y reproducción automática para captar y sostener atención.'},
+  {key:'story-suggested', label:'Historia sugerida', concept:'Capitalismo de la vigilancia', why:'Sugerida mediante perfilamiento basado en actividad previa.'},
+  {key:'composer-input', label:'Caja de composición (composer)', concept:'Economías de los afectos', why:'Publicar es un acto afectivo; genera métricas sociales y visibilidad.'},
+  {key:'composer-post', label:'Botón publicar', concept:'Economías de los afectos', why:'Convierte la expresión en contenido susceptible de reacciones y valor social.'},
+  {key:'post-header-metadata', label:'Metadatos de publicación (hora, privacy, verified)', concept:'Capitalismo de la vigilancia', why:'Proporcionan insumos para modelado temporal y segmentación.'},
+  {key:'time-stamp', label:'Timestamp (hace 2h, fecha)', concept:'Capitalismo de la vigilancia', why:'Permite modelar ritmos y patrones de actividad.'},
+  {key:'privacy', label:'Indicador de visibilidad (Público/Privado)', concept:'Capitalismo de la vigilancia', why:'Condiciona el alcance y alimenta decisiones de distribución.'},
+  {key:'verified', label:'Verified badge / insignias', concept:'Capitalismo de la vigilancia', why:'Afectan priorización algorítmica y confianza.'},
+  {key:'tag', label:'Hashtags / etiquetas', concept:'Capitalismo de la vigilancia', why:'Indexables; se usan para recomendar y segmentar.'},
+  {key:'mention', label:'Menciones (@usuario)', concept:'Capitalismo de la vigilancia', why:'Construyen grafos sociales como insumo para modelado relacional.'},
+  {key:'image', label:'Imagen / placeholder', concept:'Economía de la atención', why:'Imán visual que incrementa fijación y probabilidad de interacción.'},
+  {key:'promo-badge', label:'Etiqueta Promocionado', concept:'Capitalismo de la vigilancia', why:'Indica contenido pagado surgido de subastas basada en datos.'},
+  {key:'link-preview', label:'Vista previa de enlace (URL preview)', concept:'Capitalismo de la vigilancia', why:'Clicks en enlaces y previews son señales valiosas para inferir intereses.'},
+  {key:'views', label:'Contador de vistas', concept:'Economía de la atención', why:'Métrica de consumo que optimiza entrega y monetización.'},
+  {key:'reaction-count', label:'Contadores de reacciones por tipo', concept:'Economías de los afectos', why:'Cuantifican afectos y determinan jerarquías de visibilidad.'},
+  {key:'reaction-like', label:'Botón Me gusta (like)', concept:'Economías de los afectos', why:'Convierte afectos en métricas visibles que influyen en alcance.'},
+  {key:'reaction-picker', label:'Selector de reacciones (picker)', concept:'Economías de los afectos', why:'Permite matices afectivos; produce datos sobre valencia emocional.'},
+  {key:'comment', label:'Botón comentar / caja de comentario', concept:'Economías de los afectos', why:'Genera reciprocidad y engagement social.'},
+  {key:'comment-send', label:'Enviar comentario', concept:'Economías de los afectos', why:'Acción que produce interacciones registradas y visibilidad.'},
+  {key:'share', label:'Botón compartir', concept:'Economía de la atención', why:'Propaga contenido y multiplica cadenas de atención.'},
+  {key:'share-count', label:'Contador de compartidos', concept:'Economía de la atención', why:'Indica difusión y viralidad; métrica de exposición.'},
+  {key:'save', label:'Guardar / Bookmark', concept:'Capitalismo de la vigilancia', why:'Señal de interés sostenido; alimenta modelos y retargeting.'},
+  {key:'post-options', label:'Menú opciones (···)', concept:'Capitalismo de la vigilancia', why:'Genera metadatos y acciones que amplían recolección.'},
+  {key:'readmore', label:'Leer más / truncado', concept:'Economía de la atención', why:'Fragmenta contenidos para generar microclics y mantener sesión.'},
+  {key:'url-preview', label:'Tiny URL / previews', concept:'Capitalismo de la vigilancia', why:'Clicks e interacciones externas son señales de interés.'},
+  {key:'location', label:'Etiqueta de ubicación / geodata', concept:'Capitalismo de la vigilancia', why:'Datos espaciales para segmentación y anuncios locales.'},
+  {key:'views-inline', label:'Avatares de vistas / visto por', concept:'Economía de la atención', why:'Señal de alcance; también produce reconocimiento social.'},
+  {key:'tiny-animations', label:'Microanimaciones (like pulse, heart pop)', concept:'Economías de los afectos', why:'Recompensa visual inmediata que refuerza la interacción; además captura atención.'},
+  {key:'hover-states', label:'Estados hover/focus', concept:'Economía de la atención', why:'Guían la interacción y reducen fricción para clicks/acciones.'},
+  {key:'microcopy', label:'Microcopy (Ver más comentarios, CTA)', concept:'Economía de la atención', why:'Textos que inducen clics y navegación interna.'},
+  {key:'reaction-tooltip', label:'Tooltip "quién reaccionó"', concept:'Economías de los afectos', why:'Expone relaciones y produce reconocimiento social; genera datos relacionales.'},
+  {key:'mutual-friends', label:'Sugerir conexiones (mutual friends)', concept:'Capitalismo de la vigilancia', why:'Se usa para recomendar contactos con alta probabilidad de interacción.'},
+  {key:'autoplay', label:'Autoplay (video stories/next)', concept:'Economía de la atención', why:'Reduce la fricción para consumo continuo y aumenta tiempo en plataforma.'},
+  {key:'progress-bar', label:'Progreso de reproducción', concept:'Economía de la atención', why:'Mide cuánto de un vídeo se consume; dato clave para optimización.'},
+  {key:'mute-control', label:'Control de volumen / mute', concept:'Economía de la atención', why:'Permite ajustar experiencia pero autoplay continúa capturando atención visual.'},
+  {key:'caption-toggle', label:'Mostrar subtítulos / transcripción', concept:'Economía de la atención', why:'Facilita consumo en contextos sin audio, reduce abandono.'},
+  {key:'ad-inline', label:'Anuncio inline / patrocinado', concept:'Capitalismo de la vigilancia', why:'Monetización directa de la atención mediante segmentación.'},
+  {key:'profile-mini', label:'Mini-avatar / ver perfil', concept:'Capitalismo de la vigilancia', why:'El perfil y la acción de ver generan señales y metadatos de interés.'},
+  {key:'menu-item', label:'Menú lateral (atajos)', concept:'Vigilancia/Atención mixto', why:'Accesos rápidos que generan señales de uso y sesgos en navegación.'},
+  {key:'read-receipts', label:'Confirmaciones de lectura (mensajería)', concept:'Capitalismo de la vigilancia', why:'Miden disponibilidad y patrones comunicativos.'},
+  {key:'inline-links', label:'Enlaces incrustados (anchor)', concept:'Capitalismo de la vigilancia', why:'Clicks externos informan intereses y navegación.'}
+];
+
+/* ---------- Build micro-map panel UI and add click-to-highlight behavior ---------- */
+const mapContainer = document.getElementById('micro-map');
+MICRO_MAP.forEach(item=>{
+  const div = document.createElement('div');
+  div.className = 'map-item';
+  const colorClass = item.concept.includes('vigilancia') ? 'map-vigilancia' : (item.concept.includes('atencion') ? 'map-atencion' : 'map-afectos');
+  div.innerHTML = `<div class="map-bullet ${colorClass}"></div><div style="flex:1"><strong>${item.label}</strong><div class="small" style="margin-top:4px">${item.concept} — ${item.why}</div></div>`;
+  div.addEventListener('click', ()=>{
+    showTooltip(div, item.concept, item.why, 9000);
+    // highlight matching DOM elements (by data-micro, id, data-what)
+    const targets = Array.from(document.querySelectorAll(`[data-micro="${item.key}"], [data-what="${item.key}"], #${item.key}`));
+    if(targets.length){
+      const el = targets[0];
+      try{ el.scrollIntoView({behavior:'smooth', block:'center'}); }catch(e){}
+      el.animate([{boxShadow:'0 0 0 0 rgba(0,0,0,0)'},{boxShadow:`0 0 0 10px rgba(14,165,164,0.12)`}], {duration:800});
+    }
+  });
+  mapContainer.appendChild(div);
+});
+
+/* ---------- Tooltip handling ---------- */
+const tooltip = document.getElementById('tooltip');
+let tooltipTimer = null;
+function showTooltip(target, title, text, ms=4200){
+  clearTimeout(tooltipTimer);
+  tooltip.innerHTML = `<strong>${title}</strong><div style="margin-top:6px">${text}</div>`;
+  tooltip.style.display = 'block';
+  tooltip.setAttribute('aria-hidden','false');
+  const rect = target.getBoundingClientRect();
+  const left = Math.max(8, rect.left + window.scrollX);
+  let top = rect.top + window.scrollY - tooltip.offsetHeight - 8;
+  if(top < 8) top = rect.bottom + window.scrollY + 8;
+  tooltip.style.left = left + 'px';
+  tooltip.style.top = top + 'px';
+  tooltipTimer = setTimeout(()=>{ tooltip.style.display='none'; tooltip.setAttribute('aria-hidden','true'); }, ms);
+}
+function hideTooltip(){ tooltip.style.display='none'; tooltip.setAttribute('aria-hidden','true'); clearTimeout(tooltipTimer); }
+
+/* ---------- Attach mapping directly to the DOM elements (buttons, inputs, micro-elements) ---------- */
+function attachMappingToElements(){
+  MICRO_MAP.forEach(item=>{
+    let nodes = [];
+    // by id
+    const byId = document.getElementById(item.key);
+    if(byId) nodes.push(byId);
+    // by data-what
+    nodes = nodes.concat(Array.from(document.querySelectorAll(`[data-what="${item.key}"]`)));
+    // by pre-existing data-micro
+    nodes = nodes.concat(Array.from(document.querySelectorAll(`[data-micro="${item.key}"]`)));
+    // some special selector heuristics for common keys
+    const specialSelectors = {
+      'reaction-like': '.react-btn, .react',
+      'reaction-picker': '.reaction-picker-trigger',
+      'comment-send': '.comment-send',
+      'share': '.react-btn[data-reaction="share"], .action-btn.share, .post .action-btn.share',
+      'save': '.react-btn[data-reaction="save"], .action-btn.save, .post .action-btn.save',
+      'autoplay': '[data-what="video-autoplay"], .post-video',
+      'play-button': '.post-video .play-btn',
+      'top-search': '#top-search, #top-search-btn, .searchbar',
+      'notif-badge':'#notif-badge, #notif-btn',
+      'composer-input':'#composer-input',
+      'composer-post':'#composer-post'
+    };
+    if(specialSelectors[item.key]) {
+      nodes = nodes.concat(Array.from(document.querySelectorAll(specialSelectors[item.key])));
+    }
+    // dedupe
+    nodes = [...new Set(nodes)];
+    nodes.forEach(el=>{
+      el.setAttribute('data-micro', item.key);
+      // click shows mapping explicitly
+      el.addEventListener('click', (e)=>{
+        // avoid interfering with normal button behavior where necessary
+        try{ e.stopPropagation(); }catch(e){}
+        showTooltip(el, item.concept, item.why, 7000);
+      });
+      // hover reveals quick hint
+      el.addEventListener('mouseenter', ()=> showTooltip(el, item.concept, item.why, 2600));
+    });
+  });
+}
+
+/* run attachment after DOM ready */
+document.addEventListener('DOMContentLoaded', ()=>{
+  attachMappingToElements();
+});
+
+/* ---------- Existing bindings and behaviors (reactions, comments, video simulation, etc.) ---------- */
+/* Reactions increment + tooltip */
+document.querySelectorAll('.react-btn').forEach(btn=>{
+  btn.addEventListener('click', (e)=>{
+    const cnt = btn.querySelector('.count');
+    if(cnt) cnt.textContent = Number(cnt.textContent || 0) + 1;
+    // display mapping if attached
+    const key = btn.getAttribute('data-micro') || 'reaction-like';
+    const map = MICRO_MAP.find(x => x.key === key) || MICRO_MAP.find(x => x.key === 'reaction-like');
+    showTooltip(btn, map.concept, map.why);
+    // tiny pulse
+    btn.animate([{transform:'scale(1)'},{transform:'scale(1.06)'},{transform:'scale(1)'}], {duration:320});
+  });
+});
+
+/* comment send */
+document.querySelectorAll('.comment-send').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const input = btn.parentElement.querySelector('.comment-input');
+    if(input && input.value.trim()){
+      const key = btn.getAttribute('data-micro') || 'comment-send';
+      const map = MICRO_MAP.find(x => x.key === key) || MICRO_MAP.find(x => x.key === 'comment-send');
+      showTooltip(btn, map.concept, map.why);
+      input.value = '';
+    } else {
+      showTooltip(btn, 'Interacción', 'Escribe un comentario antes de enviar.', 1400);
+    }
+  });
+});
+
+/* reaction picker trigger */
+document.querySelectorAll('.reaction-picker-trigger').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const map = MICRO_MAP.find(x => x.key === 'reaction-picker');
+    showTooltip(btn, map.concept, map.why, 5000);
+  });
+});
+
+/* share & save */
+document.querySelectorAll('.post .action-btn.share, .react-btn[data-reaction="share"]').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const map = MICRO_MAP.find(x => x.key === 'share');
+    showTooltip(btn, map.concept, map.why);
+  });
+});
+document.querySelectorAll('.post .action-btn.save, .react-btn[data-reaction="save"]').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const map = MICRO_MAP.find(x => x.key === 'save');
+    showTooltip(btn, map.concept, map.why);
+    btn.textContent = '🔖 Guardado';
+    btn.disabled = true;
+  });
+});
+
+/* video simulation */
+document.querySelectorAll('.post-video').forEach(videoEl=>{
+  const play = videoEl.querySelector('.play-btn');
+  const mute = videoEl.querySelector('.mute-btn') || videoEl.querySelector('.controls .mute-btn');
+  const progress = videoEl.querySelector('.progress div');
+  let playing = false;
+  play && play.addEventListener('click', (e)=>{
+    e.stopPropagation();
+    const map = MICRO_MAP.find(x => x.key === 'autoplay') || {concept:'Economía de la atención', why:'Autoplay'};
+    showTooltip(play, map.concept, map.why, 5200);
+    if(!playing){
+      playing = true; play.textContent = '⏸';
+      let p = parseInt(progress.style.width) || 20;
+      const iv = setInterval(()=>{ p = Math.min(100,p + 6); progress.style.width = p + '%'; if(p>=100){ clearInterval(iv); playing=false; play.textContent='▶'; } }, 360);
+    } else { playing=false; play.textContent='▶'; }
+  });
+  mute && mute.addEventListener('click', ()=> {
+    const map = MICRO_MAP.find(x => x.key === 'mute-control');
+    if(map) showTooltip(mute, map.concept, map.why);
+  });
+});
+
+/* top search and notifications */
+document.getElementById('top-search-btn').addEventListener('click', ()=>{
+  const map = MICRO_MAP.find(x => x.key === 'top-search');
+  showTooltip(document.getElementById('top-search-btn'), map.concept, map.why, 5200);
+});
+document.getElementById('notif-btn').addEventListener('click', (e)=>{
+  const map = MICRO_MAP.find(x => x.key === 'notif-badge');
+  showTooltip(e.currentTarget, map.concept, map.why, 5200);
+  document.getElementById('notif-badge').style.display = 'none';
+});
+
+/* composer publish */
+document.getElementById('composer-post').addEventListener('click', ()=>{
+  const txt = document.getElementById('composer-input').value.trim();
+  if(!txt){ showTooltip(document.getElementById('composer-post'), 'Economías de los afectos', 'Escribe algo antes de publicar.', 1400); return; }
+  showTooltip(document.getElementById('composer-post'), 'Economías de los afectos', 'Publicar convierte expresiones en métricas y visibilidad.', 5200);
+  prependPost({author:'Tú', text: txt});
+  document.getElementById('composer-input').value = '';
+});
+
+/* explain all */
+document.getElementById('explain-all').addEventListener('click', ()=>{
+  const summary = `Vigilancia = recolección de datos y perfilado; Atención = técnicas para captar y sostener tiempo; Afectos = reacciones y comentarios que traducen emociones en métricas visibles.`;
+  showTooltip(document.getElementById('explain-all'), 'Resumen pedagógico', summary, 10000);
+});
+
+/* docente mode toggle */
+document.getElementById('toggle-doc').addEventListener('click', ()=>{
+  const on = document.body.classList.toggle('docente-mode');
+  if(on){
+    document.querySelectorAll('[data-concept]').forEach(el=>{
+      const existing = el.querySelector('.doc-badge');
+      if(existing) existing.remove();
+      const badge = document.createElement('span');
+      badge.className = 'doc-badge ' + (el.getAttribute('data-concept')==='vigilancia' ? 'doc-vigilancia' : (el.getAttribute('data-concept')==='atencion' ? 'doc-atencion' : 'doc-afectos'));
+      badge.textContent = el.getAttribute('data-concept').charAt(0).toUpperCase() + el.getAttribute('data-concept').slice(1);
+      el.style.position = 'relative';
+      el.appendChild(badge);
+    });
+  } else {
+    document.querySelectorAll('.doc-badge').forEach(b => b.remove());
+  }
+});
+
+/* algorithm simulation */
+function scorePost(el, eng, div){
+  let score = 0;
+  if(el.querySelector('[data-what="video-autoplay"]') || el.querySelector('.post-video')) score += eng * 0.6;
+  const counts = Array.from(el.querySelectorAll('.count, .reaction-count')).reduce((s, sp)=> s + (Number(sp.textContent.replace(/\D/g,''))||0), 0);
+  score += counts * (100 - div) / 50;
+  score += Math.random()*4;
+  return score;
+}
+function simulateAlgorithm(){
+  const eng = Number(document.getElementById('algo-eng').value || 60);
+  const div = Number(document.getElementById('algo-div').value || 30);
+  const feed = document.getElementById('feed-area');
+  const posts = Array.from(feed.querySelectorAll('.post'));
+  posts.sort((a,b)=> scorePost(b,eng,div) - scorePost(a,eng,div));
+  posts.forEach(p => feed.appendChild(p));
+}
+document.getElementById('algo-eng').addEventListener('input', ()=> { simulateAlgorithm(); showTooltip(document.getElementById('algo-eng'), 'Economía de la atención', 'Aumentar agresividad prioriza contenido optimizado para retención.');});
+document.getElementById('algo-div').addEventListener('input', ()=> { simulateAlgorithm(); showTooltip(document.getElementById('algo-div'), 'Capitalismo de la vigilancia', 'Baja diversidad intensifica burbujas alimentadas por perfilado.');});
+simulateAlgorithm();
+
+/* prepend generated post */
+function prependPost(p){
+  const feed = document.getElementById('feed-area');
+  const node = document.createElement('article');
+  node.className = 'post';
+  node.setAttribute('data-id','gen-'+Date.now());
+  node.innerHTML = `
+    <div class="post-header">
+      <div class="avatar-sm" aria-hidden="true"></div>
+      <div style="flex:1">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div><strong>${escapeHtml(p.author)}</strong><div class="small" style="display:inline-block;margin-left:8px"><span class="time-stamp" data-concept="vigilancia">· ahora</span></div></div>
+          <div class="small">Simulado</div>
+        </div>
+      </div>
+      <div><button class="icon-btn" data-what="post-options">···</button></div>
+    </div>
+    <div class="post-body">
+      <div>${escapeHtml(p.text)}</div>
+      <div class="post-image" data-concept="atencion" data-what="image"><div class="small">[Imagen generada]</div></div>
+      <div class="counts"><span class="reaction-count" data-concept="afectos">0 reacciones</span></div>
+    </div>
+    <div class="post-actions">
+      <button class="action-btn react-btn" data-reaction="like" data-concept="afectos">👍 <span class="count">0</span></button>
+      <button class="action-btn react-btn" data-reaction="comment" data-concept="afectos">💬 Comentar</button>
+      <button class="action-btn react-btn" data-reaction="share" data-concept="atencion">🔁 Compartir</button>
+      <button class="action-btn react-btn" data-reaction="save" data-concept="vigilancia">🔖 Guardar</button>
+    </div>
+    <div class="comment-box"><div class="avatar-sm" aria-hidden="true"></div><input class="comment-input" placeholder="Escribe un comentario..." /><button class="action-btn comment-send">Enviar</button></div>
+  `;
+  feed.insertBefore(node, feed.firstChild);
+  // attach mapping for newly added elements
+  attachMappingToElements();
+  node.querySelectorAll('.react-btn').forEach(b => b.addEventListener('click', ()=> { const c=b.querySelector('.count'); if(c) c.textContent = Number(c.textContent||0)+1;}));
+}
+
+/* shortcuts */
+document.addEventListener('keydown', (e)=>{
+  if(e.key === '1') document.querySelector('.icon-btn[data-action="home"]').click();
+  if(e.key === '2') document.getElementById('top-search').focus();
+  if(e.key === 'Escape') hideTooltip();
+});
+
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];}); }
+</script>
+</body>
+</html>
+```
